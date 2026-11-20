@@ -26,7 +26,8 @@ if ($keyword !== '') {
 
 $sql_total = "SELECT COUNT(*) AS total FROM users $where";
 $hasil_total = mysqli_query($koneksi, $sql_total);
-$total_data = mysqli_fetch_assoc($hasil_total)['total'];
+$data_total = mysqli_fetch_assoc($hasil_total);
+$total_data = (int)$data_total['total'];
 
 $total_halaman = max(1, ceil($total_data / $batas));
 
@@ -45,26 +46,18 @@ $hasil = mysqli_query($koneksi, $sql);
 
 <style>
     .pink-card {
-        border: none;
+        border: 1px solid #f3c5d8;
         border-radius: 12px;
         overflow: hidden;
-        box-shadow: 0 4px 12px rgba(214, 80, 140, 0.12);
     }
 
-    .pink-header {
-        background-color: #f4b6d2;
-        color: #713d56;
-        padding: 18px 22px;
+    .pink-card .card-header {
+        background-color: #fce4ec;
+        color: #8e4564;
+        border-bottom: 1px solid #f3c5d8;
     }
 
-    .pink-header h3 {
-        margin: 0;
-        font-size: 23px;
-        font-weight: bold;
-    }
-
-    .pink-body {
-        background-color: #fffafd;
+    .pink-card .card-body {
         padding: 22px;
     }
 
@@ -75,156 +68,173 @@ $hasil = mysqli_query($koneksi, $sql);
         font-size: 16px;
     }
 
+    .tabel-pink th,
+    .tabel-pink td {
+        padding: 12px 16px;
+        vertical-align: middle;
+    }
+
     .tabel-pink thead th {
-        background-color: #f8d5e5;
-        color: #713d56;
-        padding: 16px 18px;
+        background-color: #fce4ec;
+        color: #8e4564;
         vertical-align: middle;
-        font-size: 16px;
-    }
-
-    .tabel-pink tbody td,
-    .tabel-pink tbody th {
-        padding: 15px 18px;
-        vertical-align: middle;
-        font-size: 16px;
-    }
-
-    .tabel-pink tbody tr:nth-child(even) {
-        background-color: #fff0f6;
-    }
-
-    .tabel-pink tbody tr:hover {
-        background-color: #fde3ef;
-    }
-
-    .btn-cari-pink {
-        background-color: #e879ac;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        padding: 10px 18px;
-    }
-
-    .btn-cari-pink:hover {
-        background-color: #d95795;
-        color: white;
     }
 
     .btn-edit-pink {
-        background-color: #f5b6d2;
-        color: #713d56;
-        border: none;
+        background-color: #e9a6c1;
+        border-color: #e9a6c1;
+        color: white;
     }
 
     .btn-edit-pink:hover {
-        background-color: #ed9fc3;
-        color: #713d56;
+        background-color: #d982a5;
+        border-color: #d982a5;
+        color: white;
     }
 
     .btn-hapus-pink {
-        background-color: #dc6b91;
+        background-color: #c75b83;
+        border-color: #c75b83;
         color: white;
-        border: none;
     }
 
     .btn-hapus-pink:hover {
-        background-color: #c94d78;
+        background-color: #a94068;
+        border-color: #a94068;
         color: white;
+    }
+
+    .btn-cari-pink {
+        background-color: #d982a5;
+        border-color: #d982a5;
+        color: white;
+    }
+
+    .btn-cari-pink:hover {
+        background-color: #c75b83;
+        border-color: #c75b83;
+        color: white;
+    }
+
+    #cari,
+    select[name="batas"] {
+        border-color: #edb9ce;
+        border-radius: 8px;
+    }
+
+    #cari:focus,
+    select[name="batas"]:focus {
+        border-color: #d982a5;
+        box-shadow: 0 0 0 0.2rem rgba(217, 130, 165, 0.2);
     }
 
     .pagination .page-link {
-        color: #d95795;
-        border-color: #f3c4dc;
-        padding: 8px 13px;
+        color: #bd6488;
+        border-color: #f3c5d8;
+    }
+
+    .pagination .page-link:hover {
+        background-color: #fce4ec;
+        color: #8e4564;
     }
 
     .pagination .page-item.active .page-link {
-        background-color: #e879ac;
-        border-color: #e879ac;
+        background-color: #d982a5;
+        border-color: #d982a5;
         color: white;
     }
 
-    .form-control,
-    .form-select {
-        border-color: #f3c4dc;
-        border-radius: 8px;
-        padding: 10px 12px;
+    .pagination .page-item.disabled .page-link {
+        color: #c9a5b4;
+        background-color: #fff7fa;
     }
 
-    .form-control:focus,
-    .form-select:focus {
-        border-color: #e879ac;
-        box-shadow: 0 0 0 3px rgba(232, 121, 172, 0.15);
+    .container {
+        max-width: 1100px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .table-responsive {
+        width: 100%;
     }
 
     @media (max-width: 576px) {
-        .pink-body {
+        .pink-card .card-body {
             padding: 15px;
-        }
-
-        .pink-header h3 {
-            font-size: 21px;
         }
 
         .tabel-pink {
             font-size: 15px;
         }
 
-        .tabel-pink thead th,
-        .tabel-pink tbody td,
-        .tabel-pink tbody th {
-            padding: 13px 15px;
+        .tabel-pink th,
+        .tabel-pink td {
+            padding: 12px;
         }
     }
 </style>
 
 <div class="container mt-4 mb-4">
-
     <div class="card pink-card">
 
-        <div class="pink-header">
+        <div class="card-header">
             <h3>Tabel Daftar User</h3>
         </div>
 
-        <div class="pink-body">
+        <div class="card-body">
 
-            <form method="GET" class="row g-3 mb-4">
+            <form method="GET" class="mb-3">
+                <div class="row g-2 align-items-center">
 
-                <div class="col-12 col-md-6">
-                    <input
-                        type="text"
-                        name="cari"
-                        class="form-control"
-                        placeholder="Cari username, role, atau tanggal..."
-                        value="<?= htmlspecialchars($keyword) ?>"
-                    >
+                    <div class="col-auto">
+                        Tampilkan
+                    </div>
+
+                    <div class="col-auto">
+                        <select name="batas" class="form-select"
+                                onchange="this.form.submit()">
+                            <option value="10"
+                                <?= $batas == 10 ? 'selected' : '' ?>>10</option>
+                            <option value="25"
+                                <?= $batas == 25 ? 'selected' : '' ?>>25</option>
+                            <option value="50"
+                                <?= $batas == 50 ? 'selected' : '' ?>>50</option>
+                            <option value="100"
+                                <?= $batas == 100 ? 'selected' : '' ?>>100</option>
+                        </select>
+                    </div>
+
+                    <div class="col-auto">
+                        data per halaman
+                    </div>
+
+                    <div class="col-auto ms-auto">
+                        <label for="cari">Cari:</label>
+                    </div>
+
+                    <div class="col-auto">
+                        <input
+                            type="text"
+                            id="cari"
+                            name="cari"
+                            class="form-control"
+                            placeholder="Cari user..."
+                            value="<?= htmlspecialchars($keyword) ?>"
+                        >
+                    </div>
+
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-cari-pink">
+                            Cari
+                        </button>
+                    </div>
+
                 </div>
-
-                <div class="col-6 col-md-3">
-                    <select name="batas" class="form-select">
-                        <option value="10" <?= $batas == 10 ? 'selected' : '' ?>>10 data</option>
-                        <option value="25" <?= $batas == 25 ? 'selected' : '' ?>>25 data</option>
-                        <option value="50" <?= $batas == 50 ? 'selected' : '' ?>>50 data</option>
-                        <option value="100" <?= $batas == 100 ? 'selected' : '' ?>>100 data</option>
-                    </select>
-                </div>
-
-                <div class="col-6 col-md-3">
-                    <button type="submit" class="btn btn-cari-pink w-100">
-                        Cari
-                    </button>
-                </div>
-
             </form>
 
-            <p class="text-muted mb-3">
-                Jumlah data: <?= $total_data ?>
-            </p>
-
             <div class="table-responsive">
-
-                <table class="table table-bordered tabel-pink">
+                <table class="table table-bordered table-striped tabel-pink">
 
                     <thead>
                         <tr>
@@ -238,14 +248,12 @@ $hasil = mysqli_query($koneksi, $sql);
                     </thead>
 
                     <tbody>
-
                     <?php
                     $no = $mulai + 1;
 
-                    if (mysqli_num_rows($hasil) > 0) {
+                    if ($hasil && mysqli_num_rows($hasil) > 0) {
                         while ($baris = mysqli_fetch_assoc($hasil)) {
                     ?>
-
                         <tr>
                             <td><?= $no++ ?></td>
 
@@ -268,79 +276,75 @@ $hasil = mysqli_query($koneksi, $sql);
                             <td>
                                 <a
                                     href="form_edit_user.php?id=<?= $baris['id'] ?>&role=<?= urlencode($baris['role']) ?>"
-                                    class="btn btn-edit-pink btn-sm"
-                                >
+                                    class="btn btn-edit-pink btn-sm">
                                     Edit
                                 </a>
 
                                 <a
                                     href="aksi_hapus.php?id=<?= $baris['id'] ?>&role=<?= urlencode($baris['role']) ?>"
                                     onclick="return confirm('Yakin ingin menghapus user ini?')"
-                                    class="btn btn-hapus-pink btn-sm"
-                                >
+                                    class="btn btn-hapus-pink btn-sm">
                                     Hapus
                                 </a>
                             </td>
                         </tr>
-
                     <?php
                         }
                     } else {
                     ?>
-
                         <tr>
                             <td colspan="6" class="text-center">
                                 Data user tidak ditemukan.
                             </td>
                         </tr>
-
                     <?php } ?>
-
                     </tbody>
 
                 </table>
-
             </div>
 
-            <?php if ($total_data > 0) { ?>
+            <p class="mt-3">
+                Menampilkan
+                <?= $total_data > 0 ? $mulai + 1 : 0 ?>
+                -
+                <?= min($mulai + $batas, $total_data) ?>
+                dari <?= $total_data ?> data user.
+            </p>
 
-                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-4">
+            <nav>
+                <ul class="pagination justify-content-center">
 
-                    <small class="text-muted">
-                        Halaman <?= $halaman ?> dari <?= $total_halaman ?>
-                    </small>
+                    <li class="page-item <?= $halaman <= 1 ? 'disabled' : '' ?>">
+                        <a
+                            class="page-link"
+                            href="?halaman=<?= max(1, $halaman - 1) ?>&batas=<?= $batas ?>&cari=<?= urlencode($keyword) ?>">
+                            Sebelumnya
+                        </a>
+                    </li>
 
-                    <nav>
-                        <ul class="pagination pagination-sm mb-0">
+                    <?php for ($i = 1; $i <= $total_halaman; $i++) { ?>
+                        <li class="page-item <?= $halaman == $i ? 'active' : '' ?>">
+                            <a
+                                class="page-link"
+                                href="?halaman=<?= $i ?>&batas=<?= $batas ?>&cari=<?= urlencode($keyword) ?>">
+                                <?= $i ?>
+                            </a>
+                        </li>
+                    <?php } ?>
 
-                            <li class="page-item <?= $halaman <= 1 ? 'disabled' : '' ?>">
-                                <a
-                                    class="page-link"
-                                    href="?halaman=<?= max(1, $halaman - 1) ?>&batas=<?= $batas ?>&cari=<?= urlencode($keyword) ?>"
-                                >
-                                    Sebelumnya
-                                </a>
-                            </li>
+                    <li class="page-item <?= $halaman >= $total_halaman ? 'disabled' : '' ?>">
+                        <a
+                            class="page-link"
+                            href="?halaman=<?= min($total_halaman, $halaman + 1) ?>&batas=<?= $batas ?>&cari=<?= urlencode($keyword) ?>">
+                            Selanjutnya
+                        </a>
+                    </li>
 
-                            <li class="page-item <?= $halaman >= $total_halaman ? 'disabled' : '' ?>">
-                                <a
-                                    class="page-link"
-                                    href="?halaman=<?= min($total_halaman, $halaman + 1) ?>&batas=<?= $batas ?>&cari=<?= urlencode($keyword) ?>"
-                                >
-                                    Berikutnya
-                                </a>
-                            </li>
-
-                        </ul>
-                    </nav>
-
-                </div>
-
-            <?php } ?>
+                </ul>
+            </nav>
 
         </div>
     </div>
-
 </div>
 
 <?php require_once 'footer.php'; ?>

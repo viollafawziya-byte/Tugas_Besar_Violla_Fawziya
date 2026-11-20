@@ -88,6 +88,49 @@ include 'navbar.php';
         color: #c9a5b4;
         background-color: #fff7fa;
     }
+  
+.pink-card .card-body {
+    padding: 22px;
+}
+
+.tabel-pink {
+    width: 100%;
+    margin-bottom: 0;
+    white-space: nowrap;
+    font-size: 16px;
+}
+
+.tabel-pink th,
+.tabel-pink td {
+    padding: 12px 16px;
+    vertical-align: middle;
+}
+  .container {
+    max-width: 1100px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.pink-card .card-body {
+    padding: 22px;
+}
+
+.tabel-pink {
+    width: 100%;
+    margin-bottom: 0;
+    white-space: normal;
+    font-size: 15px;
+}
+
+.tabel-pink th,
+.tabel-pink td {
+    padding: 12px;
+    vertical-align: middle;
+}
+
+.table-responsive {
+    width: 100%;
+}
 </style>
 
 <?php
@@ -143,7 +186,7 @@ $sql = "SELECT users.*,
 $hasil = mysqli_query($koneksi, $sql);
 ?>
 
-<div class="container-fluid mt-4">
+<div class="container mt-4 mb-4">
     <div class="card pink-card">
 
         <div class="card-header">
@@ -296,8 +339,8 @@ $hasil = mysqli_query($koneksi, $sql);
                 </ul>
             </nav>
 
-            <br>
-            <a href="logout.php">Logout</a>
+          
+        
 
         </div>
     </div>

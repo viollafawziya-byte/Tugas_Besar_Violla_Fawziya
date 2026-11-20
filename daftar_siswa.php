@@ -1,9 +1,14 @@
 <?php
+session_start();
 require_once 'koneksi.php';
+
+$role = $_SESSION['role'] ?? '';
+$kelas_login = $_SESSION['kelas'] ?? '';
+
 require_once 'navbar.php';
 ?>
+
 <style>
-    /* Warna utama pink pastel */
     .pink-card {
         border: 1px solid #f3c5d8;
         border-radius: 12px;
@@ -16,7 +21,6 @@ require_once 'navbar.php';
         border-bottom: 1px solid #f3c5d8;
     }
 
-    /* Tombol Edit */
     .btn-edit-pink {
         background-color: #e9a6c1;
         border-color: #e9a6c1;
@@ -29,7 +33,6 @@ require_once 'navbar.php';
         color: #fff;
     }
 
-    /* Tombol Hapus */
     .btn-hapus-pink {
         background-color: #c75b83;
         border-color: #c75b83;
@@ -42,7 +45,6 @@ require_once 'navbar.php';
         color: #fff;
     }
 
-    /* Tombol Cari */
     .btn-cari-pink {
         background-color: #d982a5;
         border-color: #d982a5;
@@ -55,7 +57,6 @@ require_once 'navbar.php';
         color: #fff;
     }
 
-    /* Kolom pencarian dan pilihan jumlah data */
     #cari,
     select[name="batas"] {
         border-color: #edb9ce;
@@ -68,13 +69,11 @@ require_once 'navbar.php';
         box-shadow: 0 0 0 0.2rem rgba(217, 130, 165, 0.2);
     }
 
-    /* Warna judul tabel */
     .tabel-pink thead th {
         background-color: #fce4ec;
         color: #8e4564;
     }
 
-    /* Pagination */
     .pagination .page-link {
         color: #bd6488;
         border-color: #f3c5d8;
@@ -95,7 +94,29 @@ require_once 'navbar.php';
         color: #c9a5b4;
         background-color: #fff7fa;
     }
+
+    .pink-card .card-body {
+        padding: 22px;
+    }
+
+    .tabel-pink {
+        width: 100%;
+        margin-bottom: 0;
+        white-space: normal;
+        font-size: 15px;
+    }
+
+    .tabel-pink th,
+    .tabel-pink td {
+        padding: 12px;
+        vertical-align: middle;
+    }
+
+    .table-responsive {
+        width: 100%;
+    }
 </style>
+
 <?php
 
 // Pilihan jumlah data per halaman
@@ -109,12 +130,41 @@ if (!in_array($batas, [10, 25, 50, 100])) {
 $cari = isset($_GET['cari']) ? trim($_GET['cari']) : '';
 $cari_sql = mysqli_real_escape_string($koneksi, $cari);
 
+// Mengatur data berdasarkan role
 $where = "";
+
+if ($role == 'siswa') {
+    $kelas_sql = mysqli_real_escape_string($koneksi, $kelas_login);
+    $where = "WHERE kelas = '$kelas_sql'";
+}
+
+elseif ($role == 'guru') {
+
+    $guru_user_id = (int)$_SESSION['id'];
+
+    $where = "WHERE kelas IN (
+        SELECT s2.kelas
+        FROM mengajar
+        INNER JOIN mapel ON mengajar.mapel_id = mapel.id
+        INNER JOIN siswa AS s2 ON mengajar.siswa_id = s2.id
+        INNER JOIN guru ON mapel.guru_id = guru.id
+        WHERE guru.user_id = $guru_user_id
+        GROUP BY s2.kelas
+    )";
+}
+
+// Menambahkan pencarian
 if ($cari != '') {
-    $where = "WHERE nis LIKE '%$cari_sql%'
-              OR nama LIKE '%$cari_sql%'
-              OR kelas LIKE '%$cari_sql%'
-              OR jenis_kelamin LIKE '%$cari_sql%'";
+    if ($where != '') {
+        $where .= " AND ";
+    } else {
+        $where = "WHERE ";
+    }
+
+    $where .= "(nis LIKE '%$cari_sql%'
+                OR nama LIKE '%$cari_sql%'
+                OR kelas LIKE '%$cari_sql%'
+                OR jenis_kelamin LIKE '%$cari_sql%')";
 }
 
 // Menghitung jumlah data
@@ -131,22 +181,33 @@ $halaman = max(1, min($halaman, $total_halaman));
 $mulai = ($halaman - 1) * $batas;
 
 // Mengambil data siswa
-$sql = "SELECT * FROM siswa $where
+$sql = "SELECT * FROM siswa
+        $where
         ORDER BY id DESC
         LIMIT $mulai, $batas";
+
 $hasil = mysqli_query($koneksi, $sql);
+
+// Judul daftar siswa
+if ($role == 'siswa') {
+    $judul = "Daftar Siswa Kelas " . htmlspecialchars($kelas_login);
+} else {
+    $judul = "Daftar Siswa";
+}
 ?>
 
-<div class="container-fluid mt-4">
+<div class="container mt-4 mb-4" style="max-width: 1100px;">
     <div class="card pink-card">
-        <div class="card-header">
-            <h3>Daftar Siswa</h3>
+
+        <div class="card-header text-center">
+            <h3><?= $judul ?></h3>
         </div>
 
         <div class="card-body">
 
             <form method="GET" class="mb-3">
                 <div class="row g-2 align-items-center">
+
                     <div class="col-auto">
                         Tampilkan
                     </div>
@@ -185,11 +246,13 @@ $hasil = mysqli_query($koneksi, $sql);
                             Cari
                         </button>
                     </div>
+
                 </div>
             </form>
 
             <div class="table-responsive">
                 <table class="table table-bordered table-striped tabel-pink">
+
                     <thead>
                         <tr>
                             <th>No</th>
@@ -197,7 +260,10 @@ $hasil = mysqli_query($koneksi, $sql);
                             <th>Nama</th>
                             <th>Kelas</th>
                             <th>Jenis Kelamin</th>
-                            <th>Aksi</th>
+
+                            <?php if ($role == 'admin') { ?>
+                                <th>Aksi</th>
+                            <?php } ?>
                         </tr>
                     </thead>
 
@@ -208,32 +274,45 @@ $hasil = mysqli_query($koneksi, $sql);
                     if ($hasil && mysqli_num_rows($hasil) > 0) {
                         while ($baris = mysqli_fetch_assoc($hasil)) {
                     ?>
+
                         <tr>
                             <td><?= $no++ ?></td>
                             <td><?= htmlspecialchars($baris['nis']) ?></td>
                             <td><?= htmlspecialchars($baris['nama']) ?></td>
                             <td><?= htmlspecialchars($baris['kelas']) ?></td>
                             <td><?= htmlspecialchars($baris['jenis_kelamin']) ?></td>
-                            <td>
-                                <a href="form_edit_siswa.php?id=<?= $baris['user_id'] ?>"
-                                   class="btn btn-edit-pink btn-sm">Edit</a>
 
-                                <a href="aksi_hapus_siswa.php?id=<?= $baris['id'] ?>"
-                                   onclick="return confirm('Yakin ingin menghapus siswa ini?')"
-                                   class="btn btn-hapus-pink btn-sm">Hapus</a>
-                            </td>
+                            <?php if ($role == 'admin') { ?>
+                                <td>
+                                    <a href="form_edit_siswa.php?id=<?= $baris['user_id'] ?>"
+                                       class="btn btn-edit-pink btn-sm">
+                                        Edit
+                                    </a>
+
+                                    <a href="aksi_hapus_siswa.php?id=<?= $baris['id'] ?>"
+                                       onclick="return confirm('Yakin ingin menghapus siswa ini?')"
+                                       class="btn btn-hapus-pink btn-sm">
+                                        Hapus
+                                    </a>
+                                </td>
+                            <?php } ?>
                         </tr>
+
                     <?php
                         }
                     } else {
                     ?>
+
                         <tr>
-                            <td colspan="6" class="text-center">
+                            <td colspan="<?= $role == 'admin' ? 6 : 5 ?>"
+                                class="text-center">
                                 Data siswa tidak ditemukan.
                             </td>
                         </tr>
+
                     <?php } ?>
                     </tbody>
+
                 </table>
             </div>
 
@@ -278,6 +357,4 @@ $hasil = mysqli_query($koneksi, $sql);
     </div>
 </div>
 
-<?php
-require_once 'footer.php';
-?>
+<?php require_once 'footer.php'; ?>

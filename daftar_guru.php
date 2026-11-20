@@ -1,6 +1,9 @@
 <?php
 session_start();
 require_once 'koneksi.php';
+
+$role = $_SESSION['role'] ?? '';
+
 require_once 'navbar.php';
 ?>
 
@@ -89,6 +92,27 @@ require_once 'navbar.php';
         color: #c9a5b4;
         background-color: #fff7fa;
     }
+
+    .pink-card .card-body {
+        padding: 22px;
+    }
+
+    .tabel-pink {
+        width: 100%;
+        margin-bottom: 0;
+        white-space: normal;
+        font-size: 15px;
+    }
+
+    .tabel-pink th,
+    .tabel-pink td {
+        padding: 12px;
+        vertical-align: middle;
+    }
+
+    .table-responsive {
+        width: 100%;
+    }
 </style>
 
 <?php
@@ -133,10 +157,10 @@ $sql = "SELECT * FROM guru
 $hasil = mysqli_query($koneksi, $sql);
 ?>
 
-<div class="container-fluid mt-4">
+<div class="container mt-4 mb-4" style="max-width: 1100px;">
     <div class="card pink-card">
 
-        <div class="card-header">
+        <div class="card-header text-center">
             <h3>Daftar Guru</h3>
         </div>
 
@@ -195,7 +219,10 @@ $hasil = mysqli_query($koneksi, $sql);
                             <th>NIP</th>
                             <th>Nama</th>
                             <th>Jenis Kelamin</th>
-                            <th>Aksi</th>
+
+                            <?php if ($role == 'admin') { ?>
+                                <th>Aksi</th>
+                            <?php } ?>
                         </tr>
                     </thead>
 
@@ -212,25 +239,28 @@ $hasil = mysqli_query($koneksi, $sql);
                             <td><?= htmlspecialchars($baris['nama']) ?></td>
                             <td><?= htmlspecialchars($baris['jenis_kelamin']) ?></td>
 
-                            <td>
-                                <a href="form_edit_guru.php?id=<?= $baris['user_id'] ?>"
-                                   class="btn btn-edit-pink btn-sm">
-                                    Edit
-                                </a>
+                            <?php if ($role == 'admin') { ?>
+                                <td>
+                                    <a href="form_edit_guru.php?id=<?= $baris['user_id'] ?>"
+                                       class="btn btn-edit-pink btn-sm">
+                                        Edit
+                                    </a>
 
-                                <a href="aksi_hapus_guru.php?id=<?= $baris['id'] ?>"
-                                   onclick="return confirm('Yakin ingin menghapus guru ini?')"
-                                   class="btn btn-hapus-pink btn-sm">
-                                    Hapus
-                                </a>
-                            </td>
+                                    <a href="aksi_hapus_guru.php?id=<?= $baris['id'] ?>"
+                                       onclick="return confirm('Yakin ingin menghapus guru ini?')"
+                                       class="btn btn-hapus-pink btn-sm">
+                                        Hapus
+                                    </a>
+                                </td>
+                            <?php } ?>
                         </tr>
                     <?php
                         }
                     } else {
                     ?>
                         <tr>
-                            <td colspan="5" class="text-center">
+                            <td colspan="<?= $role == 'admin' ? 5 : 4 ?>"
+                                class="text-center">
                                 Data guru tidak ditemukan.
                             </td>
                         </tr>
